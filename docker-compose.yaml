@@ -1,0 +1,38 @@
+services:
+  ops:
+    build:
+      context: .
+      dockerfile: Dockerfile_Ops
+    depends_on:
+      - old-redis
+      - new-redis
+  sidekiq-old:
+    build:
+      context: .
+      dockerfile: Dockerfile_Sidekiq
+    environment:
+      - REDIS_URL=redis://old_redis:6379/0
+    depends_on:
+      - old-redis
+  sidekiq-new:
+    build:
+      context: .
+      dockerfile: Dockerfile_Sidekiq
+    environment:
+      - REDIS_URL=redis://new_redis:6379/0
+    depends_on:
+      - new-redis
+  old-redis:
+    image: "redis:alpine"
+    container_name: old_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./vendor/docker/redis1:/data
+  new-redis:
+    image: "redis:alpine"
+    container_name: new_redis
+    ports:
+      - "6380:6379"
+    volumes:
+      - ./vendor/docker/redis2:/data
